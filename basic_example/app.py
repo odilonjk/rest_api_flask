@@ -63,7 +63,7 @@ def create_item_in_store(name):
     return jsonify({'message': 'store not found'})
 
 
-@app.route('/store/<string:name>/item', methods=['GEt'])
+@app.route('/store/<string:name>/item', methods=['GET'])
 def get_item_in_store(name):
     for store in stores:
         if store['name'] == name:
