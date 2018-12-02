@@ -1,8 +1,14 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_jwt import JWT, jwt_required
+
+from security import authenticate, identity
 
 app = Flask(__name__)
+app.secret_key = 'my_secret'
 api = Api(app)
+
+jwt = JWT(app, authenticate, identity)
 
 items = [
     {
@@ -17,10 +23,12 @@ items = [
 
 
 class Item(Resource):
+    @jwt_required()
     def get(self, name):
         item = next(filter(lambda i: i['name'] == name, items), None)
         return {'item': item}, 200 if item else 404
 
+    @jwt_required()
     def post(self, name):
         if next(filter(lambda i: i['name'] == name, items), None) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
@@ -29,8 +37,16 @@ class Item(Resource):
         items.append(new_item)
         return new_item, 201
 
+    @jwt_required()
+    def delete(self, name):
+        global items
+        if (next(filter(lambda i: i['name'] == name, items), None)) is None:
+            return {'message': 'There is no item called {}.'.format(name)}, 404
+        items = [i for i in items if i['name'] != name]
+        return {'message': '{} deleted.'.format(name)}
 
 class ItemList(Resource):
+    @jwt_required()
     def get(self):
         return {'items': items}
 
