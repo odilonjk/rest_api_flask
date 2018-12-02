@@ -45,6 +45,18 @@ class Item(Resource):
         items = [i for i in items if i['name'] != name]
         return {'message': '{} deleted.'.format(name)}
 
+    @jwt_required()
+    def put(self, name):
+        data = request.get_json()
+        item = next(filter(lambda i: i['name'] == name, items), None)
+        if item is None:
+            new_item = {'name': name, 'price': data['price']}
+            items.append(new_item)
+            return new_item, 201
+        item.update(data)
+        return item
+
+
 class ItemList(Resource):
     @jwt_required()
     def get(self):
