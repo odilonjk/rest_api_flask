@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
@@ -30,9 +30,15 @@ class Item(Resource):
 
     @jwt_required()
     def post(self, name):
+        parser = reqparse.RequestParser()
+        parser.add_argument('price', 
+            type=float, 
+            required=True,
+            help='This field cannot be left blank.'
+        )
+        data = parser.parse_args()
         if next(filter(lambda i: i['name'] == name, items), None) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
-        data = request.get_json()
         new_item = {'name': name, 'price': data['price']}
         items.append(new_item)
         return new_item, 201
@@ -47,7 +53,13 @@ class Item(Resource):
 
     @jwt_required()
     def put(self, name):
-        data = request.get_json()
+        parser = reqparse.RequestParser()
+        parser.add_argument('price', 
+            type=float, 
+            required=True,
+            help='This field cannot be left blank.'
+        )
+        data = parser.parse_args()
         item = next(filter(lambda i: i['name'] == name, items), None)
         if item is None:
             new_item = {'name': name, 'price': data['price']}
