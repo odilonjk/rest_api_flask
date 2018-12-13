@@ -11,7 +11,8 @@ class Item(Resource):
         help='This field cannot be left blank.'
     )
 
-    def get_item(self, name):
+    @classmethod
+    def find_by_name(cls, name):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
@@ -21,46 +22,89 @@ class Item(Resource):
         connection.close()
         
         if row:
-            return {'name': row[0], 'price': row[1]}
+            return {'name': row[1], 'price': row[2]}
         return None
+
+    @classmethod
+    def insert(cls, item):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        query = 'INSERT INTO items VALUES (NULL, ?, ?)'
+        cursor.execute(query, (item['name'], item['price']))
+        connection.commit()
+        connection.close()
+
+    @classmethod
+    def update(cls, item):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        query = 'UPDATE items SET price=? WHERE name=?'
+        cursor.execute(query, (item['price'], item['name']))
+        connection.commit()
+        connection.close()
 
     @jwt_required()
     def get(self, name):
-        item = Item.get_item(self, name)
+        item = self.find_by_name(name)
         if item:
             return {'item': item}, 200 
         return {'message': 'Item not found.'}, 404
 
     @jwt_required()
     def post(self, name):
-        if Item.get_item(self, name) is not None:
+        if self.find_by_name(name) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
         data = Item.parser.parse_args()
         new_item = {'name': name, 'price': data['price']}
-        items.append(new_item)
+        
+        try:
+            self.insert(new_item)      
+        except:
+            return {'message': 'An error occurred inserting the item.'}, 500
+
         return new_item, 201
 
     @jwt_required()
     def delete(self, name):
-        global items
-        if Item.get_item(self, name) is None:
+        if self.find_by_name(name) is None:
             return {'message': 'There is no item called {}.'.format(name)}, 404
-        items = [i for i in items if i['name'] != name]
+        
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        query = 'DELETE FROM items WHERE name=?'
+        cursor.execute(query, (name,))
+        connection.commit()
+        connection.close()
+
         return {'message': '{} deleted.'.format(name)}
 
     @jwt_required()
     def put(self, name):
         data = Item.parser.parse_args()
-        item = Item.get_item(self, name)
+        new_item = {'name': name, 'price': data['price']}
+        item = self.find_by_name(name)
         if item is None:
-            new_item = {'name': name, 'price': data['price']}
-            items.append(new_item)
-            return new_item, 201
-        item.update(data)
-        return item
+            try:
+                self.insert(new_item)      
+            except:
+                return {'message': 'An error occurred inserting the item.'}, 500
+        else:
+            try:
+                self.update(new_item)
+            except:
+                return {'message': 'An error occurred updating the item.'}, 500
+        return new_item
 
 
 class ItemList(Resource):
     @jwt_required()
     def get(self):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        query = 'SELECT * FROM items'
+        result = cursor.execute(query)
+        items = []
+        for row in result:
+            items.append({'name': row[1], 'price': row[2]})
+        connection.close()
         return {'items': items}
