@@ -8,9 +8,15 @@ from resources.user import UserRegister
 from resources.item import Item, ItemList
 
 app = Flask(__name__)
+
+# JWT
 app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 app.secret_key = 'my_secret'
+
+# SQLAlchemy
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 api = Api(app)
 
 jwt = JWT(app, authenticate, identity)
@@ -27,4 +33,6 @@ def customized_response_handler(access_token, identity):
     })
 
 if __name__ == '__main__':
+    from database import db
+    db.init_app(app)
     app.run(port=5000, debug=True)
