@@ -15,6 +15,7 @@ app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 app.secret_key = 'my_secret'
 
 # SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 api = Api(app)
@@ -24,6 +25,7 @@ jwt = JWT(app, authenticate, identity)
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
 api.add_resource(UserRegister, '/register')
+
 
 @jwt.auth_response_handler
 def customized_response_handler(access_token, identity):

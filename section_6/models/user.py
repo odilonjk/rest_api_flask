@@ -1,12 +1,13 @@
 import sqlite3
 from database import db
 
+
 class UserModel(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(90))
     password = db.Column(db.String(90))
-    
+
     def __init__(self, _id, username, password):
         self.id = _id
         self.username = username
@@ -16,7 +17,7 @@ class UserModel(db.Model):
     def find_by_username(cls, username):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
-        
+
         query = "SELECT * FROM users WHERE username=?"
         result = cursor.execute(query, (username,))
         row = result.fetchone()
@@ -24,7 +25,7 @@ class UserModel(db.Model):
             user = cls(*row)
         else:
             user = None
-        
+
         connection.close()
         return user
 
@@ -32,7 +33,7 @@ class UserModel(db.Model):
     def find_by_id(cls, _id):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
-        
+
         query = "SELECT * FROM users WHERE id=?"
         result = cursor.execute(query, (_id,))
         row = result.fetchone()
@@ -40,6 +41,6 @@ class UserModel(db.Model):
             user = cls(*row)
         else:
             user = None
-        
+
         connection.close()
         return user
