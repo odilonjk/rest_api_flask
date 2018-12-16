@@ -26,7 +26,7 @@ class ItemModel(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-    
+
     @classmethod
     def find_all(cls):
         return cls.query.all()
