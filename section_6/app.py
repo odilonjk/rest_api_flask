@@ -4,8 +4,8 @@ from flask_jwt import JWT
 from datetime import timedelta
 
 from security import authenticate, identity
-from user import UserRegister
-from item import Item, ItemList
+from resources.user import UserRegister
+from resources.item import Item, ItemList
 
 app = Flask(__name__)
 app.config['JWT_AUTH_URL_RULE'] = '/login'
