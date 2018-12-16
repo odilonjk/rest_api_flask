@@ -1,5 +1,5 @@
 import sqlite3
-from flask_jwt import jwt_required
+from flask_jwt import jwt_required, current_identity
 from flask_restful import Resource, reqparse
 
 
@@ -52,6 +52,8 @@ class Item(Resource):
 
     @jwt_required()
     def post(self, name):
+        user = current_identity
+        print('{} is trying to create a new item called {}.'.format(user.username, name))
         if self.find_by_name(name) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
         data = Item.parser.parse_args()
