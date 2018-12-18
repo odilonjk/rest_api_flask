@@ -27,6 +27,11 @@ api.add_resource(ItemList, '/items')
 api.add_resource(UserRegister, '/register')
 
 
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+
 @jwt.auth_response_handler
 def customized_response_handler(access_token, identity):
     return jsonify({
