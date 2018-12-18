@@ -24,7 +24,7 @@ class Item(Resource):
         if ItemModel.find_by_name(name) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
         data = Item.parser.parse_args()
-        new_item = ItemModel(id=None, name=name, price=data['price'])
+        new_item = ItemModel(_id=None, name=name, price=data['price'])
 
         try:
             new_item.save_to_db()
