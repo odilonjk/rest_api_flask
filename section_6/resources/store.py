@@ -10,14 +10,14 @@ class Store(Resource):
                         required=True,
                         help='This field cannot be left blank.')
 
-    @jwt_required()
+    @jwt_required
     def get(self, name):
         store = StoreModel.find_by_name(name)
         if store:
             return store.json(), 200
         return {'message': 'Store not found.'}, 404
 
-    @jwt_required()
+    @jwt_required
     def post(self, name):
         if StoreModel.find_by_name(name) is not None:
             return {'message': 'An store called {} already exists.'.format(name)}, 400
@@ -31,7 +31,7 @@ class Store(Resource):
 
         return new_store.json(), 201
 
-    @jwt_required()
+    @jwt_required
     def delete(self, name):
         store = StoreModel.find_by_name(name)
         if store:
@@ -41,7 +41,7 @@ class Store(Resource):
 
 
 class StoreList(Resource):
-    @jwt_required()
+    @jwt_required
     def get(self):
         stores = StoreModel.find_all()
         return [store.json() for store in stores]

@@ -1,6 +1,7 @@
-from flask_jwt import jwt_required, current_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from models.item import ItemModel
+from models.user import UserModel
 
 
 class Item(Resource):
@@ -15,16 +16,16 @@ class Item(Resource):
                         required=True,
                         help='Every item needs a store id.')
 
-    @jwt_required()
+    @jwt_required
     def get(self, name):
         item = ItemModel.find_by_name(name)
         if item:
             return item.json(), 200
         return {'message': 'Item not found.'}, 404
 
-    @jwt_required()
+    @jwt_required
     def post(self, name):
-        user = current_identity
+        user = UserModel.find_by_id(get_jwt_identity())
         print('{} is trying to create a new item called {}.'.format(user.username, name))
         if ItemModel.find_by_name(name) is not None:
             return {'message': 'An item called {} already exists.'.format(name)}, 400
@@ -38,7 +39,7 @@ class Item(Resource):
 
         return new_item.json(), 201
 
-    @jwt_required()
+    @jwt_required
     def delete(self, name):
         item = ItemModel.find_by_name(name)
         if item:
@@ -46,7 +47,7 @@ class Item(Resource):
             return {'message': '{} deleted.'.format(name)}
         return {'message': 'There is no item called {}.'.format(name)}, 404
 
-    @jwt_required()
+    @jwt_required
     def put(self, name):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
@@ -60,7 +61,7 @@ class Item(Resource):
 
 
 class ItemList(Resource):
-    @jwt_required()
+    @jwt_required
     def get(self):
         items = ItemModel.find_all()
         return {'items': [item.json() for item in items]}
