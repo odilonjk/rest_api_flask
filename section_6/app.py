@@ -10,6 +10,8 @@ from resources.store import Store, StoreList
 
 app = Flask(__name__)
 
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 # JWT
 app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
