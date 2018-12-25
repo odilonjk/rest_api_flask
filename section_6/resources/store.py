@@ -1,4 +1,4 @@
-from flask_jwt import jwt_required, current_identity
+from flask_jwt_extended import jwt_required, get_jwt_claims
 from flask_restful import Resource, reqparse
 from models.store import StoreModel
 
@@ -19,6 +19,9 @@ class Store(Resource):
 
     @jwt_required
     def post(self, name):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Only admin users can create stores.'}
         if StoreModel.find_by_name(name) is not None:
             return {'message': 'An store called {} already exists.'.format(name)}, 400
 
@@ -33,6 +36,9 @@ class Store(Resource):
 
     @jwt_required
     def delete(self, name):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Only admin users can delete stores.'}
         store = StoreModel.find_by_name(name)
         if store:
             store.delete_from_db()
