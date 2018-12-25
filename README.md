@@ -7,6 +7,6 @@ Flask: **1.0.2**
 
 ### Dependencies:
 
-Flask-JWT
+Flask-JWT-Extended
 Flask-RESTful
 Flask-SQLAlchemy
