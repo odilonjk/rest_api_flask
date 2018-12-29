@@ -8,6 +8,7 @@ from resources.user import (
     User,
     UserRegister,
     UserLogin,
+    UserLogout,
     UserModel,
     TokenRefresh
 )
@@ -38,7 +39,7 @@ def add_claims_to_jwt(identity):
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
-    return decrypted_token['identity'] in BLACKLIST
+    return decrypted_token['jti'] in BLACKLIST
 
 
 @jwt.expired_token_loader
@@ -50,7 +51,7 @@ def expired_token_callback():
 
 
 @jwt.invalid_token_loader
-def invalid_token_callback():
+def invalid_token_callback(err):
     return jsonify({
         'description': 'Signature verification failed.',
         'error': 'invalid_token'
@@ -58,7 +59,7 @@ def invalid_token_callback():
 
 
 @jwt.unauthorized_loader
-def missing_token_callback():
+def missing_token_callback(err):
     return jsonify({
         'description': 'Request does not contain an access token.',
         'error': 'token_required'
@@ -88,6 +89,7 @@ api.add_resource(StoreList, '/stores')
 api.add_resource(UserRegister, '/register')
 api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserLogin, '/login')
+api.add_resource(UserLogout, '/logout')
 api.add_resource(TokenRefresh, '/refresh')
 
 
