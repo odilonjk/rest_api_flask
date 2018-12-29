@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt_claims
+from flask_jwt_extended import jwt_required, get_jwt_claims, fresh_jwt_required
 from flask_restful import Resource, reqparse
 from models.store import StoreModel
 
@@ -17,7 +17,7 @@ class Store(Resource):
             return store.json(), 200
         return {'message': 'Store not found.'}, 404
 
-    @jwt_required
+    @fresh_jwt_required
     def post(self, name):
         claims = get_jwt_claims()
         if not claims['is_admin']:
@@ -34,7 +34,7 @@ class Store(Resource):
 
         return new_store.json(), 201
 
-    @jwt_required
+    @fresh_jwt_required
     def delete(self, name):
         claims = get_jwt_claims()
         if not claims['is_admin']:
