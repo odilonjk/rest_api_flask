@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from blacklist import BLACKLIST
 
 from resources.user import (
     User,
@@ -15,8 +16,10 @@ from resources.store import Store, StoreList
 
 app = Flask(__name__)
 
-app.config['PROPAGATE_EXCEPTIONS'] = True
 app.secret_key = 'my_secret'
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
@@ -31,6 +34,11 @@ jwt = JWTManager(app)
 def add_claims_to_jwt(identity):
     user = UserModel.find_by_id(identity)
     return {'is_admin': user.is_admin}
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    return decrypted_token['identity'] in BLACKLIST
 
 
 @jwt.expired_token_loader
